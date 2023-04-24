@@ -1,6 +1,6 @@
 services:
   gateway:
-    image: bwdesigngroup/ignition-docker:8.1.22
+    image: bwdesigngroup/ignition-docker:latest
     hostname: gateway
     ports:
       - 8088
