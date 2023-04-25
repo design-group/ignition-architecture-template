@@ -18,7 +18,7 @@ ___
     ```sh
     mkdir <project-name>
     cd <project-name>
-    git clone https://github.com/design-group/ignition-project-template.git .
+    git clone https://github.com/design-group/ignition-docker-project-template.git .
     ```
 
 3. Rename the vscode workspace file to match your project name.
