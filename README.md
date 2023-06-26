@@ -37,7 +37,7 @@ ___
 	COMPOSE_PROJECT_NAME=<project-name>
 	```
 
-	If you are **NOT** using traefik as a reverse proxy, you can delete or comment out the following lines:
+	If you are **NOT** using traefik, you can delete or comment out the following lines:
 
 	```sh
 	COMPOSE_PATH_SEPARATOR=:
