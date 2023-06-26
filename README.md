@@ -1,4 +1,4 @@
-# Ignition Docker Project Template
+# Ignition Docker Project Template, Step-CA Compatible
 
 ___
 
@@ -6,7 +6,7 @@ ___
 
 Understand the process of creating docker containers using the [docker-image](https://github.com/design-group/ignition-docker).
 
-This project assumes you have a local Traefik reverse proxy running, if not, you can set one up using this repository [traefik-proxy](https://github.com/design-group/traefik-proxy)
+This project is compatible with and without a local Traefik reverse proxy running, which you can set up using this repository [traefik-proxy](https://github.com/design-group/traefik-proxy)
 
 ___
 
@@ -28,21 +28,20 @@ ___
     ```
 
 4. Review the `docker-compose.yml` file to verify the container structure is correct
-5. If using a reverse proxy, go through the `docker-compose.traefik.yml` file and change all instances of `ignition-template` to your project name.
+5. If using a reverse proxy, go through the `docker-compose.traefik.yml` file and change all instances of `<desired-address>` to your desired web address.
 6. Review the `.gitignore` file to add any
    additional directories and contents to ignore.
-7. To name the compose project that will be built, edit the `.env` file and set the `COMPOSE_PROJECT_NAME` variable to the name of 	your project.
+7. To name the compose project that will be built, edit the `.env` file and set the `COMPOSE_PROJECT_NAME` variable to the name of your project.
 
 	```sh
 	COMPOSE_PROJECT_NAME=<project-name>
 	```
 
-	or if you are using traefik as a reverse proxy, set the `.env` file to:
+	If you are **NOT** using traefik as a reverse proxy, you can delete or comment out the following lines:
 
 	```sh
 	COMPOSE_PATH_SEPARATOR=:
 	COMPOSE_FILE=docker-compose.yml:docker-compose.traefik.yml
-	COMPOSE_PROJECT_NAME=<project-name>
 	```
 
 8. If mounting the `workdir` volume on a non-MacOS device, make sure to create the directory first so that it is owned by the user running the container.
@@ -67,7 +66,7 @@ ___
 
 10. In a web browser, access the gateway at `http://localhost/` (No port is required, since the template is using port 80)
 
-11. If using traefik as a proxy, access the gateway at `http://<project-name>.localtest.me`
+11. If using traefik as a proxy, access the gateway at `http://<desired-address>.localtest.me`
 
 ___
 
