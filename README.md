@@ -6,7 +6,7 @@ ___
 
 Understand the process of creating docker containers using the [docker-image](https://github.com/design-group/ignition-docker).
 
-This project is compatible with and without the Traefik reverse proxy running. You can set up Traefik using [this repository.](https://github.com/design-group/traefik-proxy)
+This project is compatible *with* and *without* Traefik. You can set up the Traefik Proxy using [this repository.](https://github.com/design-group/traefik-proxy)
 
 ___
 
