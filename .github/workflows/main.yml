@@ -1,7 +1,7 @@
 name: auto-update
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
 jobs:
   Automatically-Update:
     name: Spenny
