@@ -67,7 +67,7 @@ ___
 
 10. In a web browser, access the gateway at `http://localhost/` (No port is required, since the template is using port 80)
 
-11. If using traefik as a proxy, access the gateway at `http://<project-name>.localtest.me` 
+11. If using traefik as a proxy, access the gateway at `http://<project-name>.localtest.me`
 
 ___
 
