@@ -1,0 +1,14 @@
+name: auto-update
+on:
+  push:
+    branches: [ main ]
+jobs:
+  Automatically-Update:
+    name: Spenny
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - name: bro idk
+        run: |
+          mkdir ignition-data
+          docker-compose up -d
