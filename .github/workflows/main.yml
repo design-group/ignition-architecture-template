@@ -11,4 +11,5 @@ jobs:
       - name: bro idk
         run: |
           mkdir ignition-data
+          chmod -R g+w ignition-data
           docker-compose up -d
