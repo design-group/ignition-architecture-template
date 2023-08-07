@@ -36,9 +36,7 @@ ___
     docker-compose pull && docker-compose up -d
     ```
 
-1. In a web browser, access the gateway at `http://localhost/` (No port is required, since the template is using port 80)
-
-1. If using traefik as a proxy, access the gateway at `http://<project-name>.localtest.me`
+1. In a web browser, access the gateway at [http://<project-name>.localtest.me](http://<project-name>.localtest.me)
 
 ___
 
