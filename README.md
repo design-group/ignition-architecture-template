@@ -22,22 +22,8 @@ ___
     ```sh
    ./initialize.sh
     ```
-1. Pull any changes to the docker image and start the container.
-      
-    On Mac:
-    
-	```sh
-    docker compose pull && docker compose up -d
-    ```
-    
-	On WSL
-    
-	```sh
-    docker-compose pull && docker-compose up -d
-    ```
 
-1. In a web browser, access the gateway at [http://<project-name>.localtest.me](http://<project-name>.localtest.me)
-
+In a web browser, access the gateway at [http://<project-name>.localtest.me](http://<project-name>.localtest.me)
 ___
 
 ## Gateway Config
