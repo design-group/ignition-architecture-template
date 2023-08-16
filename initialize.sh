@@ -14,12 +14,12 @@ mv ./*.code-workspace "${project_name}".code-workspace
 printf 'Creating .env file for the %s project... \n' "${project_name}"
 cat << EOF > ./.env
 COMPOSE_PATH_SEPARATOR=:
-COMPOSE_FILE=docker-compose.yml:docker-compose.traefik.yml
+COMPOSE_FILE=docker-compose.yaml:docker-compose.traefik.yaml
 COMPOSE_PROJECT_NAME=${project_name}
 EOF
 
 printf 'Updating Traefik compose file and README file with %s. \n' "${project_name}"
-sed -i "s/ignition-template/${project_name}/g" docker-compose.traefik.yml
+sed -i "s/ignition-template/${project_name}/g" docker-compose.traefik.yaml
 sed -i "s/<project-name>/${project_name}/g" README.md
 
 mkdir ignition-data

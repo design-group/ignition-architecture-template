@@ -36,4 +36,4 @@ bash download-gateway-backups.sh
 
 The backups are stored in the `backups` directory, and if configured in the compose file will automatically restore when the container is initially created. 
 
-If you are preparing this repository for another user, after configuration of the gateway is complete, run the above backup command, and then uncomment the volume and command listed in the `docker-compose.yml` file.
+If you are preparing this repository for another user, after configuration of the gateway is complete, run the above backup command, and then uncomment the volume and command listed in the `docker-compose.yaml` file.
