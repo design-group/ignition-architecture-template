@@ -2,10 +2,13 @@
 
 printf '\n\n   Barry-Wehmiller Design Group - Ignition Project Initialization'
 printf '\n ==================================================================== \n'
+MAX_WAIT_SECONDS=60
+WAIT_INTERVAL=5
 
-read -rp "Enter project name: " project_name
+read -rep $'Enter project name: \n' project_name
 
-printf 'Renaming file %s.code-workspace... \n' "${project_name}"
+# Update local files with project name
+printf '\n\n Renaming file %s.code-workspace... \n' "${project_name}"
 mv ./*.code-workspace "${project_name}".code-workspace
 
 printf 'Creating .env file for the %s project... \n' "${project_name}"
@@ -21,27 +24,46 @@ sed -i "s/<project-name>/${project_name}/g" README.md
 
 mkdir ignition-data
 
-printf 'Commiting changes... \n'
+# Git
+printf '\n\n Commiting changes... \n'
 git add .
 git commit -m "Initial commit"
 
-while true; do
-    printf '\n\n'
-    read -rp "Do you want to pull any changes to the docker image and start the container? (y/n) " answer
-    case "${answer}" in
-        [Yy]* ) 
-            CONTAINER_NAME="${project_name}-gateway-1"
-            MAX_WAIT_SECONDS=60
-            WAIT_INTERVAL=5
+# Check for Traefik Proxy
+if [ ! -f "../traefik-proxy/docker-compose.yml" ]; 
+then
+    printf '\n\n Traefik Proxy not found. \n'
+    pwd
+    ls -al ../
+    read -rep $'\n\n Would you like to clone the design-group/traefik-proxy to your local PC in this location? (y/n) \n' install_proxy
+    case "${install_proxy}" in
+        [yY] ) 
+            printf 'Cloning design-group/traefik-proxy...\n';
+            git clone https://github.com/design-group/traefik-proxy.git ../traefik-proxy;;
+        [nN] )
+            printf '\n Please go to https://github.com/design-group/traefik-proxy to manually setup the Traefik proxy and rerun this script. \n';;
+    esac
+fi
 
-            printf 'Waiting for Docker container %s to start...\n' "${CONTAINER_NAME}"
+# Docker pull and start containers
+while true; do
+    read -rep $'\n\n Do you want to pull any changes to the docker image and start the containers? (y/n) \n' start_containers
+    case "${start_containers}" in
+        [Yy]* ) 
+            CONTAINER_GATEWAY="${project_name}-gateway-1"
+            CONTAINER_PROXY="proxy"
+
+            printf 'Waiting for Docker container %s to start...\n' "${CONTAINER_GATEWAY}"
             docker-compose pull && docker-compose up -d
+            printf 'Waiting for Docker container %s to start...\n' "${CONTAINER_PROXY}"
+            docker-compose pull && docker-compose -f ../traefik-proxy/docker-compose.yml up -d
 
             elapsed_seconds=0
             while [ $elapsed_seconds -lt $MAX_WAIT_SECONDS ]; do
-                container_status=$(docker ps -f "name=$CONTAINER_NAME" --format "{{.Status}}")
+                gateway_status=$(docker ps -f "name=$CONTAINER_GATEWAY" --format "{{.Status}}")
+                proxy_status=$(docker ps -f "name=$CONTAINER_PROXY" --format "{{.Status}}")
                 
-                if [[ $container_status == *"Up"* ]]; then
+                if [[ $gateway_status == *"Up"* ]] && [[ $proxy_status == *"Up"* ]]; then
                     printf 'access the gateway at http://%s.localtest.me' "${project_name}"
                     break
                 fi
@@ -51,9 +73,10 @@ while true; do
             done
 
             if [ $elapsed_seconds -ge $MAX_WAIT_SECONDS ]; then
-                printf 'Timed out waiting for container %s to start.' "${CONTAINER_NAME}"
+                printf 'Timed out waiting for container %s or %s to start. \n' "${CONTAINER_GATEWAY}" "${CONTAINER_PROXY}"
+                printf 'Container %s status: %s \n' "${CONTAINER_GATEWAY}" "${gateway_status}"
+                printf 'Container %s status: %s \n' "${CONTAINER_PROXY}" "${proxy_status}"
             fi
-
             break;;
         [Nn]* ) 
             printf '\n\n Please run: \n docker-compose pull && docker-compose up -d \n'
