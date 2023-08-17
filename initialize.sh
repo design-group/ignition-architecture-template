@@ -34,7 +34,6 @@ pull_start_containers () {
             printf 'Timed out waiting for container %s to start. \n' "${container_name}"
             printf 'Container %s status: %s \n' "${container_name}" "${container_status}"
         fi
-
         
         break
     done
@@ -43,6 +42,57 @@ pull_start_containers () {
 printf '\n\n Ignition Architecture Initialization'
 printf '\n ==================================================================== \n'
 
+# Setup and start Docker for reverse proxy
+# Run a command to check proxy.localtest.me for Traefik dashboard, if its not there then wait 5 seconds and try again
+printf '\n\n\n Checking Traefik dashboard at http://proxy.localtest.me \n'
+
+while true; do
+    response=$(curl -s -o /dev/null -w "%{http_code}" "http://proxy.localtest.me/dashboard/#/")
+
+    if [ "$response" == "200" ]; then
+        printf '\n\n Traefik dashboard is up and running! \n'
+        break
+    else
+        printf '\n\n Traefik Proxy dashboard not accessible. \n\n'
+        install_path="${HOME}"/traefik-proxy/
+        echo -n 'Default location is: '"${install_path}"
+        read -rep $' Would you like to use this default path (y/n)?' use_default
+
+        case "${use_default}" in
+            [yY]* ) 
+                mkdir -p "${install_path}";;
+            [nN]* )
+                install_path=""
+                while true; do
+                    if [ -d "${install_path}" ]; then
+                        echo "${install_path}"
+                        ls -al "${install_path}"
+                        read -rep $'\n\n Would you like to clone the design-group/traefik-proxy to your local PC in this location? (y/n) \n' install_proxy
+                        case "${install_proxy}" in
+                            [yY]* )
+                                break;;
+                            [nN]* )
+                                install_path="";;
+                            * ) 
+                                printf 'Please answer y or n. \n';;
+                        esac
+                    else
+                        read -rep $'\n Please enter a valid empty folder path to clone into [Format: /home/user/traefik-proxy/]: ' install_path
+                        if [[ "$install_path" =~ ^(/[^/ ]*)+/?$ ]]; then
+                            mkdir -p "${install_path}"
+                        fi
+                    fi;
+                done;;
+            * )
+                printf 'Please answer y or n. \n'
+        esac
+
+    printf 'Cloning design-group/traefik-proxy into %s...\n' "${install_path}"
+    git clone https://github.com/design-group/traefik-proxy.git "${install_path}"
+    pull_start_containers "${project_name}" proxy "${install_path}"/docker-compose.yml
+    fi
+done
+    
 read -rep $'Enter project name: ' project_name
 
 # Update local files with project name
@@ -57,68 +107,24 @@ COMPOSE_PROJECT_NAME=${project_name}
 EOF
 
 printf 'Updating Traefik compose file and README file with %s. \n' "${project_name}"
-sed -i "s/ignition-template/${project_name}/g" docker-compose.traefik.yaml
-sed -i "s/<project-name>/${project_name}/g" README.md
+sed --quiet "s/ignition-template/${project_name}/g" docker-compose.traefik.yaml
+sed --quiet "s/<project-name>/${project_name}/g" README.md
 
 mkdir -p ignition-data
 
 # Git
-printf '\n\n Commiting changes... \n'
+printf '\n\n Creating initial commit for repository. \n'
 git add .
-git commit -m "Initial commit"
-
-# Setup and start Docker for reverse proxy
-if [ ! -f "${HOME}"/traefik-proxy/docker-compose.yml ]; 
-then
-    printf '\n\n Traefik Proxy not found in home directory. \n'
-    install_path="${HOME}"/traefik-proxy/
-    echo "${install_path}"
-    read -rep $'\n Would you like to use the default path (y/n)?' use_default
-
-    case "${use_default}" in
-        [Yy]* ) 
-            mkdir -p "${install_path}";;
-        [Nn]* )
-            install_path=""
-            while true; do
-                if [ -d "${install_path}" ]; then
-                    echo "${install_path}"
-                    ls -al "${install_path}"
-                    read -rep $'\n\n Would you like to clone the design-group/traefik-proxy to your local PC in this location? (y/n) \n' install_proxy
-                    case "${install_proxy}" in
-                        [Yy]* )
-                            break;;
-                        [Nn]* )
-                            install_path="";;
-                        * ) 
-                            printf 'Please answer y or n. \n';;
-                    esac
-                else
-                    read -rep $'\n Please enter a valid empty folder path to clone into [Format: /home/user/traefik-proxy/]: ' install_path
-                    if [[ "$install_path" =~ ^(/[^/ ]*)+/?$ ]]; then
-                        mkdir -p "${install_path}"
-                    fi
-                fi;
-            done;;
-        * )
-            printf 'Please answer y or n. \n'
-    esac
-
-    printf 'Cloning design-group/traefik-proxy into %s...\n' "${install_path}"
-    git clone https://github.com/design-group/traefik-proxy.git "${install_path}"
-    pull_start_containers "${project_name}" proxy "${install_path}"/docker-compose.yml
-else
-    printf '\n\n Traefik Proxy found in home directory. \n'
-fi
+git commit --quiet -m "Initial commit"
 
 # Setup and start Docker for Gateway
 while true; do
     read -rep $'\n\n Do you want to pull any changes to the Docker image and start the Ignition Gateway container? (y/n) \n' start_container
     case "${start_container}" in
-        [Yy]* ) 
+        [yY]* ) 
             pull_start_containers "${project_name}" "${project_name}-gateway-1" ./docker-compose.yaml;
             break;;
-        [Nn]* ) 
+        [nN]* ) 
             printf '\n\n Please run: \n docker-compose pull && docker-compose up -d'
             printf '\n Once the container is started, in a web browser, access the gateway at http://%s.localtest.me' "${project_name}";
             break;;
