@@ -44,18 +44,18 @@ printf '\n ==================================================================== 
 
 # Setup and start Docker for reverse proxy
 # Run a command to check proxy.localtest.me for Traefik dashboard, if its not there then wait 5 seconds and try again
-printf '\n\n\n Checking Traefik dashboard at http://proxy.localtest.me \n'
+printf '\n Checking Traefik dashboard at http://proxy.localtest.me \n'
 
 while true; do
     response=$(curl -s -o /dev/null -w "%{http_code}" "http://proxy.localtest.me/dashboard/#/")
 
     if [ "$response" == "200" ]; then
-        printf '\n\n Traefik dashboard is up and running! \n'
+        printf '\n Traefik dashboard is up and running! \n'
         break
     else
-        printf '\n\n Traefik Proxy dashboard not accessible. \n\n'
+        printf '\n Traefik Proxy dashboard not accessible. \n'
         install_path="${HOME}"/traefik-proxy/
-        echo -n 'Default location is: '"${install_path}"
+        echo -n ' Default location is: '"${install_path}"
         read -rep $' Would you like to use this default path (y/n)?' use_default
 
         case "${use_default}" in
@@ -74,7 +74,7 @@ while true; do
                             [nN]* )
                                 install_path="";;
                             * ) 
-                                printf 'Please answer y or n. \n';;
+                                printf ' Please answer y or n. \n';;
                         esac
                     else
                         read -rep $'\n Please enter a valid empty folder path to clone into [Format: /home/user/traefik-proxy/]: ' install_path
@@ -84,36 +84,36 @@ while true; do
                     fi;
                 done;;
             * )
-                printf 'Please answer y or n. \n'
+                printf ' Please answer y or n. \n'
         esac
 
-    printf 'Cloning design-group/traefik-proxy into %s...\n' "${install_path}"
+    printf ' Cloning design-group/traefik-proxy into %s...\n' "${install_path}"
     git clone https://github.com/design-group/traefik-proxy.git "${install_path}"
     pull_start_containers "${project_name}" proxy "${install_path}"/docker-compose.yml
     fi
 done
     
-read -rep $'Enter project name: ' project_name
+read -rep $' Enter project name: ' project_name
 
 # Update local files with project name
 printf '\n\n Renaming file %s.code-workspace... \n' "${project_name}"
 mv ./*.code-workspace "${project_name}".code-workspace
 
-printf 'Creating .env file for the %s project... \n' "${project_name}"
+printf ' Creating .env file for the %s project... \n' "${project_name}"
 cat << EOF > ./.env
 COMPOSE_PATH_SEPARATOR=:
 COMPOSE_FILE=docker-compose.yaml:docker-compose.traefik.yaml
 COMPOSE_PROJECT_NAME=${project_name}
 EOF
 
-printf 'Updating Traefik compose file and README file with %s. \n' "${project_name}"
+printf ' Updating Traefik compose file and README file with %s. \n' "${project_name}"
 sed --quiet "s/ignition-template/${project_name}/g" docker-compose.traefik.yaml
 sed --quiet "s/<project-name>/${project_name}/g" README.md
 
 mkdir -p ignition-data
 
 # Git
-printf '\n\n Creating initial commit for repository. \n'
+printf '\n Creating initial commit for repository. \n'
 git add .
 git commit --quiet -m "Initial commit"
 
@@ -129,7 +129,7 @@ while true; do
             printf '\n Once the container is started, in a web browser, access the gateway at http://%s.localtest.me' "${project_name}";
             break;;
         * ) 
-            printf 'Please answer y or n.';;
+            printf ' Please answer y or n.';;
     esac
 done
 
