@@ -42,14 +42,17 @@ pull_start_containers () {
 printf '\n\n Ignition Architecture Initialization'
 printf '\n ==================================================================== \n'
 
+read -rep $' Enter project name: ' project_name
+
 # Setup and start Docker for reverse proxy
 # Run a command to check proxy.localtest.me for Traefik dashboard, if its not there then wait 5 seconds and try again
-printf '\n Checking Traefik dashboard at http://proxy.localtest.me \n'
+printf '\n Checking Traefik dashboard at http(s)://proxy.localtest.me/dashboard/#/ \n'
 
 while true; do
-    response=$(curl -s -o /dev/null -w "%{http_code}" "http://proxy.localtest.me/dashboard/#/")
+    http_response=$(curl -s -o /dev/null -w "%{http_code}" "http://proxy.localtest.me/dashboard/#/")
+    https_response=$(curl -s -o /dev/null -w "%{http_code}" "https://proxy.localtest.me/dashboard/#/")
 
-    if [ "$response" == "200" ]; then
+    if [ "$http_response" == "200" ] || [ "$https_response" == "200" ]; then
         printf '\n Traefik dashboard is up and running! \n'
         break
     else
@@ -92,8 +95,6 @@ while true; do
     pull_start_containers "${project_name}" proxy "${install_path}"/docker-compose.yml
     fi
 done
-    
-read -rep $' Enter project name: ' project_name
 
 # Update local files with project name
 printf '\n\n Renaming file %s.code-workspace... \n' "${project_name}"
