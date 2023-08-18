@@ -11,7 +11,11 @@ pull_start_containers () {
     while true; do
 
         printf '\n\n Waiting for Docker container %s to start...\n' "${container_name}"
-        docker-compose pull && docker-compose -f "${compose_file}" up -d
+        if [[ ! "${container_name}" == "proxy" ]]; then
+            docker-compose pull && docker-compose up -d
+        else
+            docker-compose pull && docker-compose -f "${compose_file}" up -d
+        fi
 
         elapsed_seconds=0
         while [ $elapsed_seconds -lt $MAX_WAIT_SECONDS ]; do
@@ -22,6 +26,7 @@ pull_start_containers () {
                 printf 'access the gateway at http://%s.localtest.me' "${project}"
                 break
             elif [[ $container_status == *"Up"* ]] && [[ "${container_name}" == "proxy" ]]; then
+                sleep $WAIT_INTERVAL
                 printf 'Container %s status: %s \n' "${container_name}" "${container_status}"
                 break
             fi
@@ -108,8 +113,16 @@ COMPOSE_PROJECT_NAME=${project_name}
 EOF
 
 printf ' Updating Traefik compose file and README file with %s. \n' "${project_name}"
-sed --quiet "s/ignition-template/${project_name}/g" docker-compose.traefik.yaml
-sed --quiet "s/<project-name>/${project_name}/g" README.md
+sed -i.bak "s/ignition-template/${project_name}/g" docker-compose.traefik.yaml
+sed -i.bak "s/<project-name>/${project_name}/g" README.md
+
+if [ -f "docker-compose.traefik.yaml" ] && [ -f "docker-compose.traefik.yaml.bak" ]; then
+    rm docker-compose.traefik.yaml.bak
+fi
+
+if [ -f "README.md" ] && [ -f "README.md.bak" ]; then
+    rm README.md.bak
+fi
 
 mkdir -p ignition-data
 
@@ -126,7 +139,8 @@ while true; do
             pull_start_containers "${project_name}" "${project_name}-gateway-1" ./docker-compose.yaml;
             break;;
         [nN]* ) 
-            printf '\n\n Please run: \n docker-compose pull && docker-compose up -d'
+            printf '\n On Mac, please run: \n docker compose pull && docker compose up -d'
+            printf '\n In WSL, please run: \n docker-compose pull && docker-compose up -d'
             printf '\n Once the container is started, in a web browser, access the gateway at http://%s.localtest.me' "${project_name}";
             break;;
         * ) 
